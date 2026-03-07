@@ -14,9 +14,39 @@ export interface GenerateImageResult {
   filePath: string;
   mimeType: string;
   text?: string;
+  model: string;
 }
 
-const DEFAULT_MODEL = "gemini-2.5-flash-preview-image-generation";
+export interface ImageModel {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export const IMAGE_MODELS: ImageModel[] = [
+  {
+    id: "gemini-2.5-flash-image",
+    name: "Nano Banana (Gemini 2.5 Flash Image)",
+    description: "Best cost-benefit. Fast, high quality image generation.",
+  },
+  {
+    id: "gemini-2.0-flash-exp-image-generation",
+    name: "Gemini 2.0 Flash Exp",
+    description: "Experimental image generation with Gemini 2.0 Flash.",
+  },
+  {
+    id: "gemini-3-pro-image-preview",
+    name: "Nano Banana Pro (Gemini 3 Pro Image)",
+    description: "Higher quality. Improved text rendering and world knowledge.",
+  },
+  {
+    id: "gemini-3.1-flash-image-preview",
+    name: "Nano Banana 2 (Gemini 3.1 Flash Image)",
+    description: "Latest model. Better instruction following and text rendering.",
+  },
+];
+
+export const DEFAULT_MODEL = IMAGE_MODELS[0].id;
 const VALID_ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3"];
 
 export function getClient(apiKey: string): GoogleGenAI {
@@ -29,6 +59,10 @@ export function validateAspectRatio(ratio: string): boolean {
 
 export function getValidAspectRatios(): string[] {
   return [...VALID_ASPECT_RATIOS];
+}
+
+export function getModelIds(): string[] {
+  return IMAGE_MODELS.map((m) => m.id);
 }
 
 export async function generateImage(
@@ -99,5 +133,6 @@ export async function generateImage(
     filePath,
     mimeType: imageData.mimeType,
     text: resultText,
+    model,
   };
 }
