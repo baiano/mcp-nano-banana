@@ -81,6 +81,13 @@ export async function generateImage(
     );
   }
 
+  // The filename comes from the model, so it must not be able to leave outputDir.
+  if (filename !== path.basename(filename) || filename === "." || filename === "..") {
+    throw new Error(
+      `Invalid filename "${filename}". Use a plain file name without directories.`
+    );
+  }
+
   const response = await client.models.generateContent({
     model,
     contents: options.prompt,

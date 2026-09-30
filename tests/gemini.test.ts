@@ -114,6 +114,20 @@ describe("generateImage", () => {
     expect(fs.readFileSync(result.filePath).toString()).toBe("fake-png-data");
   });
 
+  it("rejects filenames that would leave the output directory", async () => {
+    const mockGenerate = vi.fn();
+    const fakeClient = { models: { generateContent: mockGenerate } } as any;
+
+    for (const filename of ["../escape.png", "nested/escape.png", "/tmp/escape.png", ".."]) {
+      await expect(
+        generateImage(fakeClient, { prompt: "test", outputDir: tmpDir, filename })
+      ).rejects.toThrow("Invalid filename");
+    }
+
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(fs.existsSync(path.join(tmpDir, "..", "escape.png"))).toBe(false);
+  });
+
   it("passes correct config to Gemini API", async () => {
     const fakeImageBase64 = Buffer.from("data").toString("base64");
     const mockGenerate = vi.fn().mockResolvedValue({
@@ -138,7 +152,7 @@ describe("generateImage", () => {
     });
 
     expect(mockGenerate).toHaveBeenCalledWith({
-      model: "gemini-2.5-flash-preview-image-generation",
+      model: "gemini-2.5-flash-image",
       contents: "a sunset",
       config: {
         responseModalities: ["TEXT", "IMAGE"],
